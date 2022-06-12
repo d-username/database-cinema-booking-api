@@ -4,6 +4,6 @@ const { createCustomer, updateCustomer } = require("../controllers/customer");
 const router = express.Router();
 
 router.post("/register", createCustomer);
-router.put("/:id", updateCustomer);
+router.patch("/:id", updateCustomer);
 
 module.exports = router;

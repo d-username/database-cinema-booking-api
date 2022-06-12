@@ -1,7 +1,23 @@
 const prisma = require("../utils/prisma");
 
+const filters = {
+  greaterThan: "gt",
+  lessThan: "lt",
+};
+
 const getMovies = async (req, res) => {
+  const { runtimeMins, comparison } = req.query;
+  const whereData = {};
+
+  if (runtimeMins && comparison) {
+    const filter = {};
+    const operator = filters[comparison];
+    filter[operator] = Number(runtimeMins);
+    whereData.runtimeMins = filter;
+  }
+
   const movies = await prisma.movie.findMany({
+    where: whereData,
     include: {
       screenings: true,
     },
@@ -11,11 +27,19 @@ const getMovies = async (req, res) => {
 };
 
 const createMovies = async (req, res) => {
+  const { screenings } = req.body;
+
+  const movieData = {
+    title: req.body.title,
+    runtimeMins: Number(req.body.runtimeMins),
+  };
+
+  if (screenings) {
+    movieData.screenings = { create: screenings };
+  }
+
   const movie = await prisma.movie.create({
-    data: {
-      title: req.body.title,
-      runtimeMins: Number(req.body.runtimeMins),
-    },
+    data: movieData,
   });
 
   res.json({ data: movie });
